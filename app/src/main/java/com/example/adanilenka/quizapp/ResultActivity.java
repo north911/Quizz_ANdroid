@@ -21,7 +21,6 @@ public class ResultActivity extends AppCompatActivity {
     RatingBar ratingBar1, ratingBar2;
     ImageView img;
     Button tryButton, resultButton;
-    List<User> users;
     Bundle b;
 
     @Override
@@ -103,11 +102,13 @@ public class ResultActivity extends AppCompatActivity {
         resultTextView.setVisibility(View.VISIBLE);
         resultButton.setVisibility(View.INVISIBLE);
         resultList.setVisibility(View.VISIBLE);
+        DbHelper dbHelper = new DbHelper(this);
+        List<Player> players = dbHelper.getAllPlayers();
 
         StringBuilder resultsString = new StringBuilder();
 
-        for (User user : users) {
-            resultsString.append(user.getUsername() + ": " + user.getScore() + "\n");
+        for (Player player : players) {
+            resultsString.append(player.getName() + ": " + player.getScore() + "\n");
         }
         resultList.setText(resultsString);
     }
@@ -121,6 +122,8 @@ public class ResultActivity extends AppCompatActivity {
         Objects.requireNonNull(findViewById(R.id.fr_register)).setVisibility(View.INVISIBLE);
         EditText name = (EditText) findViewById(R.id.username);
         new DbHelper(this).addPlayerToDB(createPlayer(name.getText().toString(), b.getInt("score")));
+        Objects.requireNonNull(findViewById(R.id.buttonResult)).setVisibility(View.VISIBLE);
+
     }
 
     public Player createPlayer(String name, int score){

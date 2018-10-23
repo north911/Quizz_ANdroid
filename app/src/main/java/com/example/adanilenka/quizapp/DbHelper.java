@@ -123,8 +123,8 @@ public class DbHelper extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             do {
                 Player p = new Player();
-                p.setName(cursor.getString(0));
-                p.setScore(cursor.getInt(1));
+                p.setName(cursor.getString(1));
+                p.setScore(cursor.getInt(2));
                 players.add(p);
 
             } while (cursor.moveToNext());
@@ -161,7 +161,7 @@ public class DbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + DB_TABLE);
+//        db.execSQL("DROP TABLE IF EXISTS " + DB_TABLE);
         db.execSQL("DROP TABLE IF EXISTS " + PLAYER_NAMES);
         onCreate(db);
     }
