@@ -1,0 +1,25 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.example.adanilenka.quizapp.activity.MainActivity">
+    <item
+        android:id="@+id/more_options"
+        android:orderInCategory="100"
+        android:title="@string/more_options"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/fewer_options"
+        android:orderInCategory="100"
+        android:title="@string/fewer_options"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/more_questions"
+        android:orderInCategory="100"
+        android:title="@string/more_questions"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/fewer_questions"
+        android:orderInCategory="100"
+        android:title="@string/fewer_questions"
+        app:showAsAction="never" />
+</menu>

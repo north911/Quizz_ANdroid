@@ -1,0 +1,30 @@
+<resources>
+    <string name="app_name">Quiz App</string>
+    <string name="more_questions">More questions</string>
+    <string name="fewer_questions">Fewer questions</string>
+    <string name="more_options">More options</string>
+    <string name="fewer_options">Fewer options</string>
+    <string name="str_next">Next</string>
+    <string name="str_ans">Answer</string>
+    <string name="str_submit">Submit</string>
+    <string name="str_results">All Results</string>
+    <string name="str_welcome">Welcom to Quiz Game</string>
+    <string name="str_try">Try Again!</string>
+    <string name="str_results_but">Results</string>
+
+    <string name="HP">HP</string>
+    <string name="IBM">IBM</string>
+    <string name="CICSO">CICSO</string>
+    <string name="HUAWEI">HUAWEI</string>
+    <string name="APPLE">APPLE</string>
+
+    <string name="Linux">Linux</string>
+    <string name="BIOS">BIOS</string>
+    <string name="DOS">DOS</string>
+    <string name="WINDOWS">WINDOWS</string>
+    <string name="Mac_OS">Mac OS</string>
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="your_score">Your score:</string>
+    <string name="name">Name</string>
+</resources>
