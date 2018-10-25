@@ -1,8 +1,9 @@
 package com.example.adanilenka.quizapp;
 
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -16,11 +17,12 @@ import android.widget.TextView;
 
 import java.util.Collections;
 import java.util.List;
-
-import static java.security.AccessController.getContext;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
 
+    public static final String INCORRECT = "INCORRECT";
+    public static final String CORRECT = "CORRECT";
     List<Question> questionList;
     int score = 0;
     int quid = 0;
@@ -61,44 +63,66 @@ public class MainActivity extends AppCompatActivity {
     public void btClick(View view) {
         RadioGroup grp = (RadioGroup) findViewById(R.id.radioGroup1);
         RadioButton answer = (RadioButton) findViewById(grp.getCheckedRadioButtonId());
+//        setCorrectColour(grp);
+
+        handleAnswer(answer);
+        postProcessAnswer();
+    }
+
+    private void setCorrectColour(RadioGroup grp) {
+        for (int i = 0; i < grp.getChildCount(); i++) {
+            if (((RadioButton) findViewById(grp.getCheckedRadioButtonId())).getText().equals(currentQuestion.getAnswer())){
+                RadioButton correctAnswer = (RadioButton) findViewById(grp.getChildAt(i).getId());
+                correctAnswer.setTextColor(Color.GREEN);
+            }
+        }
+    }
+
+    private void postProcessAnswer() {
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (quid < 5) {
+                    currentQuestion = questionList.get(quid);
+                    setQuestionView();
+                    TextView resultTextView = (TextView) findViewById(R.id.correct);
+                    Objects.requireNonNull(resultTextView).setText("");
+                } else {
+                    Intent intent = new Intent(MainActivity.this, ResultActivity.class);
+                    Bundle b = new Bundle();
+                    b.putInt("score", score);
+                    intent.putExtras(b);
+                    startActivity(intent);
+                    finish();
+                }
+            }
+        }, 3000);
+    }
+
+    private void handleAnswer(RadioButton answer) {
         if (currentQuestion.getAnswer().equals(answer.getText())) {
             score++;
+            TextView resultTextView = (TextView) findViewById(R.id.correct);
+            Objects.requireNonNull(resultTextView).setText(CORRECT);
+            resultTextView.setTextColor(Color.GREEN);
             Log.d("Score", "Your score: " + score);
-        }
-
-        if (quid < 5) {
-            currentQuestion = questionList.get(quid);
-            setQuestionView();
         } else {
-            Intent intent = new Intent(MainActivity.this, ResultActivity.class);
-            Bundle b = new Bundle();
-            b.putInt("score", score);
-            intent.putExtras(b);
-            startActivity(intent);
-            finish();
+            TextView resultTextView = (TextView) findViewById(R.id.correct);
+            Objects.requireNonNull(resultTextView).setText(INCORRECT + "\nCorrect answer is " + currentQuestion.getAnswer());
+            resultTextView.setTextColor(Color.RED);
         }
-
-
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-     /*   if (id == R.id.action_settings) {
-            return true;
-        }*/
 
         return super.onOptionsItemSelected(item);
     }

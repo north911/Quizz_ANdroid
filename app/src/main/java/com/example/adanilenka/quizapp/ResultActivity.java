@@ -108,7 +108,7 @@ public class ResultActivity extends AppCompatActivity {
         StringBuilder resultsString = new StringBuilder();
 
         for (Player player : players) {
-            resultsString.append(player.getName() + ": " + player.getScore() + "\n");
+            resultsString.append(player.getName()).append(": ").append(player.getScore()).append("\n");
         }
         resultList.setText(resultsString);
     }
