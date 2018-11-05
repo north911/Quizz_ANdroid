@@ -1,13 +1,18 @@
 package com.example.adanilenka.quizapp;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by adanilenka on 10/22/2018.
@@ -18,15 +23,14 @@ public class DbHelper extends SQLiteOpenHelper {
     private static final int DB_VERSION = 2;
     private static final String DB_NAME = "quizdb";
     private static final String DB_TABLE = "quiztable";
+    private static final String ANSWERS = "answers";
+    private static final String PLAYER_NAMES = "player_names";
+
 
     //table column names
     private static final String KEY_ID = "id";
     private static final String KEY_QUES = "question";
     private static final String KEY_ANSWER = "answer";
-    private static final String KEY_OPTA = "optA";
-    private static final String KEY_OPTB = "optB";
-    private static final String KEY_OPTC = "optC";
-    private static final String PLAYER_NAMES = "player_names";
     private static final String KEY_NAME = "name";
     private static final String KEY_SCORE = "score";
 
@@ -41,18 +45,22 @@ public class DbHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         dbase = db;
-        String sqlQuery = String.format("CREATE TABLE IF NOT EXISTS %s ( %s INTEGER PRIMARY KEY AUTOINCREMENT, %s TEXT, %s TEXT, %s TEXT, %s TEXT, %s TEXT )",
-                DB_TABLE, KEY_ID, KEY_QUES, KEY_ANSWER, KEY_OPTA, KEY_OPTB, KEY_OPTC);
+   /*     String sqlQuery = String.format("CREATE TABLE IF NOT EXISTS %s ( %s INTEGER PRIMARY KEY, %s TEXT, %s TEXT)",
+                DB_TABLE, KEY_ID, KEY_QUES, KEY_ANSWER);
         String sqlQuery2 = String.format("CREATE TABLE IF NOT EXISTS %s ( %s INTEGER PRIMARY KEY AUTOINCREMENT, %s TEXT, %s INT)",
                 PLAYER_NAMES, KEY_ID, KEY_NAME, KEY_SCORE);
+        String sqlQuery3 = String.format("CREATE TABLE IF NOT EXISTS %s ( %s INTEGER PRIMARY KEY, %s TEXT)",
+                ANSWERS, KEY_ID, KEY_ANSWER);
         db.execSQL(sqlQuery);
         db.execSQL(sqlQuery2);
-        addQuestions();
+        db.execSQL(sqlQuery3);
+        addQuestions();*/
     }
 
     private void addQuestions() {
-        Question q1 = new Question("Which company is the largest manufacturer of network equipment ?", "HP", "IBM", "CICSO", "CISCO");
+        Question q1 = new Question("Which company is the largest manufacturer of network equipment ?", "HP", 1);
         this.addQuestionToDB(q1);
+        /*
         Question q2 = new Question("Which of the following is NOT an operating system ?", "Linux", "BIOS", "DOS", "BIOS");
         this.addQuestionToDB(q2);
         Question q3 = new Question("Who is the founder of Apple Inc. ?", "Jose Thomas", "Bill Gates", "Steve Jobs", "Steve Jobs");
@@ -90,7 +98,7 @@ public class DbHelper extends SQLiteOpenHelper {
         Question q19 = new Question("Who won the Cricket World cup in 2011 ?", "Australia", "India", "England", "India");
         this.addQuestionToDB(q19);
         Question q20 = new Question("The number regarded as the lucky number in Italy is ?", "13", "7", "9", "13");
-        this.addQuestionToDB(q20);
+        this.addQuestionToDB(q20);*/
     }
 
     public void addPlayerToDB(Player player) {
@@ -102,14 +110,46 @@ public class DbHelper extends SQLiteOpenHelper {
         dbase.insert(PLAYER_NAMES, null, values);
     }
 
+
     public void addQuestionToDB(Question q) {
         ContentValues values = new ContentValues();
         values.put(KEY_QUES, q.getQuestion());
         values.put(KEY_ANSWER, q.getAnswer());
-        values.put(KEY_OPTA, q.getOptA());
+        values.put(KEY_ID, q.getId());
+      /*  values.put(KEY_OPTA, q.getOptA());
         values.put(KEY_OPTB, q.getOptB());
-        values.put(KEY_OPTC, q.getOptC());
+        values.put(KEY_OPTC, q.getOptC());*/
         dbase.insert(DB_TABLE, null, values);
+    }
+
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void UpdatePlayers(SQLiteDatabase db, HashMap<String, Long> userList) {
+        db.execSQL("DROP TABLE IF EXISTS " + PLAYER_NAMES);
+        String sqlQuery2 = String.format("CREATE TABLE IF NOT EXISTS %s ( %s INTEGER PRIMARY KEY AUTOINCREMENT, %s TEXT, %s INT)",
+                PLAYER_NAMES, KEY_ID, KEY_NAME, KEY_SCORE);
+        db.execSQL(sqlQuery2);
+        for (Map.Entry<String, Long> entry : userList.entrySet()) {
+            ContentValues values = new ContentValues();
+            values.put(KEY_NAME, entry.getKey());
+            values.put(KEY_SCORE, entry.getValue());
+            db.insert(PLAYER_NAMES, null, values);
+        }
+    }
+
+
+    public void UpdateQuestions(SQLiteDatabase db, HashMap<String, Question> questionMap) {
+        db.execSQL("DROP TABLE IF EXISTS " + DB_TABLE);
+        String sqlQuery2 = String.format("CREATE TABLE IF NOT EXISTS %s ( %s INTEGER PRIMARY KEY, %s TEXT, %s TEXT)",
+                DB_TABLE, KEY_ID, KEY_QUES, KEY_ANSWER);
+        db.execSQL(sqlQuery2);
+        for (Map.Entry<String, Question> q : questionMap.entrySet()) {
+            ContentValues values = new ContentValues();
+            values.put(KEY_QUES, q.getValue().getQuestion());
+            values.put(KEY_ANSWER, q.getValue().getAnswer());
+            values.put(KEY_ID, q.getValue().getId());
+            db.insert(DB_TABLE, null, values);
+        }
     }
 
     public List<Player> getAllPlayers() {
@@ -130,15 +170,46 @@ public class DbHelper extends SQLiteOpenHelper {
             } while (cursor.moveToNext());
         }
         return players;
+    }
 
+    public void UpdateAnswers(SQLiteDatabase db, List<Answer> answerHashMap) {
+        db.execSQL("DROP TABLE IF EXISTS " + ANSWERS);
+        String sqlQuery2 = String.format("CREATE TABLE IF NOT EXISTS %s ( %s INTEGER PRIMARY KEY AUTOINCREMENT, %s INT, %s TEXT)",
+                ANSWERS, KEY_ID, KEY_QUES, KEY_ANSWER);
+        db.execSQL(sqlQuery2);
+        for (int i = 1; i < answerHashMap.size(); i++) {
+            ContentValues values = new ContentValues();
+//            values.put(KEY_ID, q.getKey());
+            values.put(KEY_QUES, answerHashMap.get(i).getIdQuestion());
+            values.put(KEY_ANSWER, answerHashMap.get(i).getAnswer());
+            db.insert(ANSWERS, null, values);
+        }
+    }
+
+    public List<Answer> getAnswersByIdQuestion(int id) {
+        List<Answer> answerList = new ArrayList<>();
+        dbase = this.getReadableDatabase();
+        String selectQuery = "SELECT * FROM " + ANSWERS + " WHERE " + KEY_QUES + "=" + id;
+//        String selectQuery = "SELECT * FROM " + ANSWERS;
+        @SuppressLint("Recycle") Cursor cursor = dbase.rawQuery(selectQuery, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                Answer answer = new Answer();
+                answer.setAnswer(cursor.getString(2));
+                answerList.add(answer);
+
+            } while (cursor.moveToNext());
+        }
+        return answerList;
     }
 
     public List<Question> getAllQuestions() {
-        List<Question> questionList = new ArrayList<Question>();
+        List<Question> questionList = new ArrayList<>();
 
         dbase = this.getReadableDatabase();
         String selectQuery = "SELECT * FROM " + DB_TABLE;
-        Cursor cursor = dbase.rawQuery(selectQuery, null);
+        @SuppressLint("Recycle") Cursor cursor = dbase.rawQuery(selectQuery, null);
         rowCount = cursor.getCount();
 
         if (cursor.moveToFirst()) {
@@ -147,9 +218,6 @@ public class DbHelper extends SQLiteOpenHelper {
                 q.setId(cursor.getInt(0));
                 q.setQuestion(cursor.getString(1));
                 q.setAnswer(cursor.getString(2));
-                q.setOptA(cursor.getString(3));
-                q.setOptB(cursor.getString(4));
-                q.setOptC(cursor.getString(5));
 
                 questionList.add(q);
 

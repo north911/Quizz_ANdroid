@@ -12,6 +12,9 @@ import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import java.util.List;
 import java.util.Objects;
 
@@ -22,13 +25,15 @@ public class ResultActivity extends AppCompatActivity {
     ImageView img;
     Button tryButton, resultButton;
     Bundle b;
+    private DatabaseReference myRef;
+    DbHelper dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_result);
-
-        RatingBar ratingBar = (RatingBar)findViewById(R.id.ratingBar1);
+        dbHelper = new DbHelper(this);
+        RatingBar ratingBar = (RatingBar) findViewById(R.id.ratingBar1);
         scoreTxtView = (TextView) findViewById(R.id.score);
         scoreText = (TextView) findViewById(R.id.scoreText);
         resultTextView = (TextView) findViewById(R.id.RresultTextView);
@@ -114,7 +119,7 @@ public class ResultActivity extends AppCompatActivity {
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
-    public void onClickSubmit(View view){
+    public void onClickSubmit(View view) {
         Objects.requireNonNull(findViewById(R.id.fr_result)).setVisibility(View.VISIBLE);
         Objects.requireNonNull(findViewById(R.id.fr_allResult)).setVisibility(View.VISIBLE);
         Objects.requireNonNull(findViewById(R.id.buttonTry)).setVisibility(View.VISIBLE);
@@ -123,10 +128,11 @@ public class ResultActivity extends AppCompatActivity {
         EditText name = (EditText) findViewById(R.id.username);
         new DbHelper(this).addPlayerToDB(createPlayer(name.getText().toString(), b.getInt("score")));
         Objects.requireNonNull(findViewById(R.id.buttonResult)).setVisibility(View.VISIBLE);
-
+        myRef = FirebaseDatabase.getInstance().getReference("players");
+        myRef.child(name.getText().toString()).setValue(b.getInt("score"));
     }
 
-    public Player createPlayer(String name, int score){
+    public Player createPlayer(String name, int score) {
         Player player = new Player();
         player.setName(name);
         player.setScore(score);

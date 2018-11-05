@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -15,7 +16,15 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.GenericTypeIndicator;
+import com.google.firebase.database.ValueEventListener;
+
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -23,6 +32,8 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String INCORRECT = "INCORRECT";
     public static final String CORRECT = "CORRECT";
+    private DatabaseReference myRef;
+    FirebaseDatabase database;
     List<Question> questionList;
     int score = 0;
     int quid = 0;
@@ -31,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     TextView txtQuestion;
     RadioButton rda, rdb, rdc;
     Button butNext;
+    DbHelper dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,24 +51,72 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        DbHelper dbHelper = new DbHelper(this);
-        questionList = dbHelper.getAllQuestions();
-        Collections.shuffle(questionList);
-        currentQuestion = questionList.get(quid);
+        dbHelper = new DbHelper(this);
+//        SQLiteDatabase db = dbHelper.getWritableDatabase();
+//        dbHelper.onCreate(db);
 
         txtQuestion = (TextView) findViewById(R.id.question);
         rda = (RadioButton) findViewById(R.id.radio0);
         rdb = (RadioButton) findViewById(R.id.radio1);
         rdc = (RadioButton) findViewById(R.id.radio2);
         butNext = (Button) findViewById(R.id.button1);
+
+        myRef = FirebaseDatabase.getInstance().getReference();
+        myRef.child("players").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                GenericTypeIndicator<HashMap<String, Long>> listPlayer = new GenericTypeIndicator<HashMap<String, Long>>() {
+                };
+                HashMap<String, Long> listOfPlayers = dataSnapshot.getValue(listPlayer);
+                dbHelper.UpdatePlayers(dbHelper.getWritableDatabase(), listOfPlayers);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                System.out.println("The read failed: " + databaseError.getCode());
+            }
+        });
+        myRef.child("questions").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                GenericTypeIndicator<HashMap<String, Question>> listOption = new GenericTypeIndicator<HashMap<String, Question>>() {
+                };
+                HashMap<String, Question> questionMap = dataSnapshot.getValue(listOption);
+//                myRef = FirebaseDatabase.getInstance().getReference("questions");
+                dbHelper.UpdateQuestions(dbHelper.getWritableDatabase(), questionMap);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                System.out.println("The read failed: " + databaseError.getCode());
+            }
+        });
+
+        myRef.child("answers").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                GenericTypeIndicator<List<Answer>> listQuestion = new GenericTypeIndicator<List<Answer>>() {
+                };
+                List<Answer> answerHashMap = dataSnapshot.getValue(listQuestion);
+                dbHelper.UpdateAnswers(dbHelper.getWritableDatabase(), answerHashMap);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                System.out.println("The read failed: " + databaseError.getCode());
+            }
+        });
+        questionList = dbHelper.getAllQuestions();
+        Collections.shuffle(questionList);
+        currentQuestion = questionList.get(quid);
         setQuestionView();
     }
 
     private void setQuestionView() {
         txtQuestion.setText(currentQuestion.getQuestion());
-        rda.setText(currentQuestion.getOptA());
-        rdb.setText(currentQuestion.getOptB());
-        rdc.setText(currentQuestion.getOptC());
+        rda.setText(dbHelper.getAnswersByIdQuestion(currentQuestion.getId()).get(0).getAnswer());
+        rdb.setText(dbHelper.getAnswersByIdQuestion(currentQuestion.getId()).get(1).getAnswer());
+        rdc.setText(dbHelper.getAnswersByIdQuestion(currentQuestion.getId()).get(2).getAnswer());
         quid++;
     }
 
@@ -69,14 +129,6 @@ public class MainActivity extends AppCompatActivity {
         postProcessAnswer();
     }
 
-    private void setCorrectColour(RadioGroup grp) {
-        for (int i = 0; i < grp.getChildCount(); i++) {
-            if (((RadioButton) findViewById(grp.getCheckedRadioButtonId())).getText().equals(currentQuestion.getAnswer())){
-                RadioButton correctAnswer = (RadioButton) findViewById(grp.getChildAt(i).getId());
-                correctAnswer.setTextColor(Color.GREEN);
-            }
-        }
-    }
 
     private void postProcessAnswer() {
         Handler handler = new Handler();
@@ -122,8 +174,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
         return super.onOptionsItemSelected(item);
     }
 }

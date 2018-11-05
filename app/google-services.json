@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "732002299743",
+    "firebase_url": "https://pomslab3.firebaseio.com",
+    "project_id": "pomslab3",
+    "storage_bucket": "pomslab3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:732002299743:android:64437e3ee3d410cb",
+        "android_client_info": {
+          "package_name": "com.example.adanilenka.quizapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "732002299743-lm6d43ktnuomhri5jt7q5iscuuuv4ssd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDkakjT_ZolXpf_cw4S5DLPChAk4J3zIZk"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
